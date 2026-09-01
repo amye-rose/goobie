@@ -20,7 +20,6 @@ services:
       - POLL_INTERVAL_MINUTES=15
       - TZ=Etc/UTC
 
-    # a homelab box shouldn't fill its disk with bot logs
     logging:
       driver: json-file
       options:

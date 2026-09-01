@@ -7,8 +7,6 @@ import type {
     Update
 } from "./types.ts"
 
-// resolve against the repo, not the cwd, so the service does not silently
-// create a second database if WorkingDirectory is wrong
 const dbDir = path.join(import.meta.dirname, "..", "db")
 
 const db = new Database(process.env.DB_PATH ?? path.join(dbDir, "goobie.db"))
@@ -133,23 +131,16 @@ export function setNotified(update_id: string) {
 
 function storeUpdates(updates: Update[], markNotified: boolean) {
     for (const update of updates) {
-        // updates.review_id is a FK into reviews, so skip any update whose
-        // review isn't stored yet (load reviews first)
         if (!getReview(update.review_id)) continue
         addUpdate(update)
         if (markNotified) setNotified(update.update_id)
     }
 }
 
-/** Poll path: new updates stay pending so the notify cycle announces them. */
 export function addUpdates(updates: Update[]) {
     storeUpdates(updates, false)
 }
 
-/**
- * /add path: seed a newly added user's backlog already marked as notified, so
- * adding them doesn't spam the channel with their whole history.
- */
 export function loadUpdates(updates: Update[]) {
     storeUpdates(updates, true)
 }

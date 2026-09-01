@@ -86,9 +86,7 @@ export async function pollUsers() {
     const users = allUsers()
 
     for (const user of users) {
-        // one bad feed (deleted profile, Goodreads 5xx) must not abort the cycle
         try {
-            // reviews first: updates.review_id is a FK into reviews
             loadReviews(await pollReviews(user.user_id))
             addUpdates(await pollUpdates(user.user_id))
         } catch (error) {
@@ -123,8 +121,6 @@ export async function notify(container: ContainerBuilder, client: Client) {
     const channelID = process.env.CHANNEL_ID
     if (!channelID) throw new Error("CHANNEL_ID is not set")
 
-    // fetch instead of reading the cache: the channel may not be cached yet on a
-    // fresh start, and the old cast turned that into a TypeError
     const channel = await client.channels.fetch(channelID)
     if (!channel?.isSendable()) throw new Error(`Channel ${channelID} is missing or not sendable`)
 

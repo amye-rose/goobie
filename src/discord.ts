@@ -112,8 +112,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
-// systemd stops the unit with SIGTERM; close cleanly so the next start is not
-// left recovering a half-written database
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
     process.once(signal, async () => {
         console.log(`Received ${signal}, shutting down`)
