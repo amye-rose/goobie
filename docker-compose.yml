@@ -1,0 +1,28 @@
+services:
+  goobie:
+    build: .
+    image: goobie
+    container_name: goobie
+    restart: unless-stopped
+
+    # PID 1 signal handling + zombie reaping, so `docker compose stop` reaches
+    # the SIGTERM handler instead of being killed after the grace period
+    init: true
+
+    volumes:
+      # the sqlite database; schema.sql stays in the image, so this mount is
+      # data only and can't shadow it
+      - ./db:/data
+      # read by node --env-file at startup
+      - ./.env:/app/.env:ro
+
+    environment:
+      - POLL_INTERVAL_MINUTES=15
+      - TZ=Etc/UTC
+
+    # a homelab box shouldn't fill its disk with bot logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
